@@ -1,255 +1,266 @@
+local THMenu = {}
+
+function TicketMenuFillTickets()
+
+	if THMenu.TicketsListView == nil then return end
+	THMenu.TicketsListView:Clear()
+
+	for k,v in pairs( TicketHandler.Tickets ) do
+
+		local status = "Awaiting Response"
+		if v.status == 1 then status = "Being Reviewed" elseif v.status == 2 then status = "Closed" end
+
+		THMenu.TicketsListView:AddLine( v.time, v.number, v.category, v.user .. " (" .. v.steamid .. ")", status )
+
+	end
+
+end
+
+function TicketMenuOpenTicket( ticket )
+
+	if THMenu.OpenTicketTab == nil then return end
+
+	THMenu.TicketAdminLabel:SetText( ticket.user )
+	THMenu.OpenTicketTab:Show()
+
+end
+
 local function TicketHandlerMenu()
 
-	THMenu = vgui.Create( "THPanel" )
+	THMenu.Main = vgui.Create( "THPanel" )
 
 	-- Header
 
 		--Header buttons
-		local HeaderButtons = vgui.Create( "DPanel", THMenu )
-		HeaderButtons:SetSize( THMenu:GetWide()-8, 24 )
-		HeaderButtons:SetPos( 4, 4 )
-		HeaderButtons:SetBackgroundColor( Color( 0, 0, 0, 0 ) )
+		THMenu.HeaderButtons = vgui.Create( "DPanel", THMenu.Main )
+		THMenu.HeaderButtons:SetSize( THMenu.Main:GetWide()-8, 24 )
+		THMenu.HeaderButtons:SetPos( 4, 4 )
+		THMenu.HeaderButtons:SetBackgroundColor( Color( 0, 0, 0, 0 ) )
 
 			--Close menu
-			local CloseButton = vgui.Create( "THCloseButton", HeaderButtons )
-			CloseButton:Dock( RIGHT ) 
-			CloseButton:DockMargin( 4, 0, 0, 0 )
-			CloseButton:SetText( "" )
-			CloseButton.DoClick = function()
-				THMenu:Hide()
+			THMenu.CloseButton = vgui.Create( "THCloseButton", THMenu.HeaderButtons )
+			THMenu.CloseButton:Dock( RIGHT ) 
+			THMenu.CloseButton:DockMargin( 4, 0, 0, 0 )
+			THMenu.CloseButton:SetText( "" )
+			THMenu.CloseButton.DoClick = function()
+				THMenu.Main:Hide()
 			end
 
 			--Create new ticket
-			local CreateTicketButton = vgui.Create( "THHeaderButton", HeaderButtons )
-			CreateTicketButton:SetText( "Create Ticket" )
-			CreateTicketButton:SizeToContentsX()
-			CreateTicketButton:Dock( LEFT )
-			CreateTicketButton:DockMargin( 4, 0, 0, 0 ) 
+			THMenu.CreateTicketButton = vgui.Create( "THHeaderButton", THMenu.HeaderButtons )
+			THMenu.CreateTicketButton:SetText( "Create Ticket" )
+			THMenu.CreateTicketButton:SizeToContentsX()
+			THMenu.CreateTicketButton:Dock( LEFT )
+			THMenu.CreateTicketButton:DockMargin( 4, 0, 0, 0 ) 
 
 			--View tickets (my tickets for users or all tickets for admins)
-			local ViewTicketsButton = vgui.Create( "THHeaderButton", HeaderButtons )
-			ViewTicketsButton:SetText( "View Tickets" )
-			ViewTicketsButton:Dock( LEFT ) 
-			ViewTicketsButton:DockMargin( 24, 0, 24, 0 )
-			ViewTicketsButton:SizeToContentsX()
+			THMenu.ViewTicketsButton = vgui.Create( "THHeaderButton", THMenu.HeaderButtons )
+			THMenu.ViewTicketsButton:SetText( "View Tickets" )
+			THMenu.ViewTicketsButton:Dock( LEFT ) 
+			THMenu.ViewTicketsButton:DockMargin( 24, 0, 24, 0 )
+			THMenu.ViewTicketsButton:SizeToContentsX()
 
 			--View admins (for owner or superadmins)
-			local ViewAdminsButton = vgui.Create( "THHeaderButton", HeaderButtons )
-			ViewAdminsButton:SetText( "Admin Overview" )
-			ViewAdminsButton:SizeToContentsX()
-			ViewAdminsButton:Dock( LEFT )
+			THMenu.ViewAdminsButton = vgui.Create( "THHeaderButton", THMenu.HeaderButtons )
+			THMenu.ViewAdminsButton:SetText( "Admin Overview" )
+			THMenu.ViewAdminsButton:SizeToContentsX()
+			THMenu.ViewAdminsButton:Dock( LEFT )
 
 	-- Tabs
 
 		--Create ticket
-		local CreateTicketTab = vgui.Create( "THTab", THMenu )
-		CreateTicketTab:Dock( FILL )
-		CreateTicketTab:DockMargin( 4, 36, 4, 4 )
+		THMenu.CreateTicketTab = vgui.Create( "THTab", THMenu.Main )
+		THMenu.CreateTicketTab:Dock( FILL )
+		THMenu.CreateTicketTab:DockMargin( 4, 36, 4, 4 )
 
 			--Upper panel
-			local CTUpperPanel = vgui.Create( "DPanel", CreateTicketTab )
-			CTUpperPanel:SetBackgroundColor( Color( 0, 0, 0, 0 ) )
-			CTUpperPanel:Dock( TOP )
-			CTUpperPanel:DockMargin( 4, 4, 4, 0 )
+			THMenu.CTUpperPanel = vgui.Create( "DPanel", THMenu.CreateTicketTab )
+			THMenu.CTUpperPanel:SetBackgroundColor( Color( 0, 0, 0, 0 ) )
+			THMenu.CTUpperPanel:Dock( TOP )
+			THMenu.CTUpperPanel:DockMargin( 4, 4, 4, 0 )
 
-				local SelectCategory = vgui.Create( "DComboBox", CTUpperPanel )
+				THMenu.SelectCategory = vgui.Create( "DComboBox", THMenu.CTUpperPanel )
 
 				for k,v in pairs( TicketHandlerCategories ) do
-					SelectCategory:AddChoice( v )
+					THMenu.SelectCategory:AddChoice( v )
 				end
 
-				SelectCategory:Dock( LEFT )
-				SelectCategory:SetSize( THMenu:GetWide() / 2, 30 )
-				SelectCategory:SetValue( "Select a ticket category" )
+				THMenu.SelectCategory:Dock( LEFT )
+				THMenu.SelectCategory:SetSize( THMenu.Main:GetWide() / 2, 30 )
+				THMenu.SelectCategory:SetValue( "Select a ticket category" )
 					
-				local ReportPlayerSelect = vgui.Create( "DComboBox", CTUpperPanel )
-				ReportPlayerSelect:SetColor( Color( 0, 0, 0, 255 ) )
+				THMenu.ReportPlayerSelect = vgui.Create( "DComboBox", THMenu.CTUpperPanel )
+				THMenu.ReportPlayerSelect:SetColor( Color( 0, 0, 0, 255 ) )
 
 				for k,v in pairs( player.GetAll() ) do
-					ReportPlayerSelect:AddChoice( v:Nick() .. " (" .. v:SteamID() .. ")" )
+					THMenu.ReportPlayerSelect:AddChoice( v:Nick() .. " (" .. v:SteamID() .. ")" )
 				end
 
-				ReportPlayerSelect:SetSize( THMenu:GetWide() / 4, 30 )
-				ReportPlayerSelect:Dock( RIGHT )
-				ReportPlayerSelect:DockMargin( 32, 0, 0, 0 )
-				ReportPlayerSelect:Hide()
+				THMenu.ReportPlayerSelect:SetSize( THMenu.Main:GetWide() / 4, 30 )
+				THMenu.ReportPlayerSelect:Dock( RIGHT )
+				THMenu.ReportPlayerSelect:DockMargin( 32, 0, 0, 0 )
+				THMenu.ReportPlayerSelect:Hide()
 
 			--Bottom panel
-			local CTBottomPanel = vgui.Create( "DPanel", CreateTicketTab )
-			CTBottomPanel:SetSize( 100, 30 )
-			CTBottomPanel:SetBackgroundColor( Color( 0, 0, 0, 0 ) ) 
-			CTBottomPanel:Dock( BOTTOM )
-			CTBottomPanel:DockMargin( 4, 4, 4, 4 )
+			THMenu.CTBottomPanel = vgui.Create( "DPanel", THMenu.CreateTicketTab )
+			THMenu.CTBottomPanel:SetSize( 100, 30 )
+			THMenu.CTBottomPanel:SetBackgroundColor( Color( 0, 0, 0, 0 ) ) 
+			THMenu.CTBottomPanel:Dock( BOTTOM )
+			THMenu.CTBottomPanel:DockMargin( 4, 4, 4, 4 )
 
-				local SubmitTicketButton = vgui.Create( "DButton", CTBottomPanel )
-				SubmitTicketButton:SetSize( 100, 24 )
-				SubmitTicketButton:SetText( "Create Ticket" )
-				SubmitTicketButton:Dock( RIGHT )
-				SubmitTicketButton:DockMargin( 0, 3, 0, 3 )
+				THMenu.SubmitTicketButton = vgui.Create( "DButton", THMenu.CTBottomPanel )
+				THMenu.SubmitTicketButton:SetSize( 100, 24 )
+				THMenu.SubmitTicketButton:SetText( "Create Ticket" )
+				THMenu.SubmitTicketButton:Dock( RIGHT )
+				THMenu.SubmitTicketButton:DockMargin( 0, 3, 0, 3 )
 				
-				local IncludeChatLogs = vgui.Create( "DCheckBoxLabel", CTBottomPanel )
-				IncludeChatLogs:SetText( "Include chat logs" )
-				IncludeChatLogs:SetSize( 140, 30 )
-				IncludeChatLogs:SetTextColor( Color( 0, 0, 0, 255 ) )
-				IncludeChatLogs:Dock( LEFT )
-				IncludeChatLogs:DockMargin( 0, 8, 0, 0 )
+				THMenu.IncludeChatLogs = vgui.Create( "DCheckBoxLabel", THMenu.CTBottomPanel )
+				THMenu.IncludeChatLogs:SetText( "Include chat logs" )
+				THMenu.IncludeChatLogs:SetSize( 140, 30 )
+				THMenu.IncludeChatLogs:SetTextColor( Color( 0, 0, 0, 255 ) )
+				THMenu.IncludeChatLogs:Dock( LEFT )
+				THMenu.IncludeChatLogs:DockMargin( 0, 8, 0, 0 )
 
-				local IncludeDeathLogs = vgui.Create( "DCheckBoxLabel", CTBottomPanel )
-				IncludeDeathLogs:SetText( "Include death logs" )
-				IncludeDeathLogs:SetSize( 140, 30 )
-				IncludeDeathLogs:SetTextColor( Color( 0, 0, 0, 255 ) )
-				IncludeDeathLogs:Dock( LEFT )
-				IncludeDeathLogs:DockMargin( 0, 8, 0, 0 )
+				THMenu.IncludeDeathLogs = vgui.Create( "DCheckBoxLabel", THMenu.CTBottomPanel )
+				THMenu.IncludeDeathLogs:SetText( "Include death logs" )
+				THMenu.IncludeDeathLogs:SetSize( 140, 30 )
+				THMenu.IncludeDeathLogs:SetTextColor( Color( 0, 0, 0, 255 ) )
+				THMenu.IncludeDeathLogs:Dock( LEFT )
+				THMenu.IncludeDeathLogs:DockMargin( 0, 8, 0, 0 )
 
-				local IncludeDamageLogs = vgui.Create( "DCheckBoxLabel", CTBottomPanel )
-				IncludeDamageLogs:SetText( "Include damage logs" )
-				IncludeDamageLogs:SetSize( 140, 30 )
-				IncludeDamageLogs:SetTextColor( Color( 0, 0, 0, 255 ) )
-				IncludeDamageLogs:Dock( LEFT )
-				IncludeDamageLogs:DockMargin( 0, 8, 0, 0 )
+				THMenu.IncludeDamageLogs = vgui.Create( "DCheckBoxLabel", THMenu.CTBottomPanel )
+				THMenu.IncludeDamageLogs:SetText( "Include damage logs" )
+				THMenu.IncludeDamageLogs:SetSize( 140, 30 )
+				THMenu.IncludeDamageLogs:SetTextColor( Color( 0, 0, 0, 255 ) )
+				THMenu.IncludeDamageLogs:Dock( LEFT )
+				THMenu.IncludeDamageLogs:DockMargin( 0, 8, 0, 0 )
 
-				local IncludeConnectionLogs = vgui.Create( "DCheckBoxLabel", CTBottomPanel )
-				IncludeConnectionLogs:SetText( "Include connection logs" )
-				IncludeConnectionLogs:SetSize( 140, 30 )
-				IncludeConnectionLogs:SetTextColor( Color( 0, 0, 0, 255 ) )
-				IncludeConnectionLogs:Dock( LEFT )
-				IncludeConnectionLogs:DockMargin( 0, 8, 0, 0 )
+				THMenu.IncludeConnectionLogs = vgui.Create( "DCheckBoxLabel", THMenu.CTBottomPanel )
+				THMenu.IncludeConnectionLogs:SetText( "Include connection logs" )
+				THMenu.IncludeConnectionLogs:SetSize( 140, 30 )
+				THMenu.IncludeConnectionLogs:SetTextColor( Color( 0, 0, 0, 255 ) )
+				THMenu.IncludeConnectionLogs:Dock( LEFT )
+				THMenu.IncludeConnectionLogs:DockMargin( 0, 8, 0, 0 )
 
 			--Top panel
-			local CTTopPanel = vgui.Create( "DPanel", CreateTicketTab )
-			CTTopPanel:SetSize( CreateTicketTab:GetWide() - 8, 100 )
-			CTTopPanel:SetBackgroundColor( Color( 0, 0, 0, 0 ) )
-			CTTopPanel:Dock( LEFT )
-			CTTopPanel:DockMargin( 4, 4, 4, 0 )
+			THMenu.CTTopPanel = vgui.Create( "DPanel", THMenu.CreateTicketTab )
+			THMenu.CTTopPanel:SetSize( THMenu.CreateTicketTab:GetWide() - 8, 100 )
+			THMenu.CTTopPanel:SetBackgroundColor( Color( 0, 0, 0, 0 ) )
+			THMenu.CTTopPanel:Dock( LEFT )
+			THMenu.CTTopPanel:DockMargin( 4, 4, 4, 0 )
 
-				local InfoLabel = vgui.Create( "DLabel", CTTopPanel )
-				InfoLabel:SetText( "Please describe the issue as well as you can" )
-				InfoLabel:SetColor( Color( 0, 0, 0, 255 ) )
-				InfoLabel:Dock( TOP )
+				THMenu.InfoLabel = vgui.Create( "DLabel", THMenu.CTTopPanel )
+				THMenu.InfoLabel:SetText( "Please describe the issue as well as you can" )
+				THMenu.InfoLabel:SetColor( Color( 0, 0, 0, 255 ) )
+				THMenu.InfoLabel:Dock( TOP )
 
-				local TicketMessage = vgui.Create( "DTextEntry", CTTopPanel )
+				THMenu.TicketMessage = vgui.Create( "DTextEntry", THMenu.CTTopPanel )
 
-				SelectCategory.OnSelect = function( panel, index, value )
+				THMenu.SelectCategory.OnSelect = function( panel, index, value )
 					if value == "Report Player" then
-						ReportPlayerSelect:Dock( TOP )
-						ReportPlayerSelect:Show()
+						THMenu.ReportPlayerSelect:Dock( TOP )
+						THMenu.ReportPlayerSelect:Show()
 					else
-						ReportPlayerSelect:Dock( NODOCK )
-						ReportPlayerSelect:Hide()
-						TicketMessage:Dock( NODOCK )
-						TicketMessage:Dock( FILL )
+						THMenu.ReportPlayerSelect:Dock( NODOCK )
+						THMenu.ReportPlayerSelect:Hide()
+						THMenu.TicketMessage:Dock( NODOCK )
+						THMenu.TicketMessage:Dock( FILL )
 					end
 				end
 
-				TicketMessage:Dock( FILL )
-				TicketMessage:SetMultiline( true )
+				THMenu.TicketMessage:Dock( FILL )
+				THMenu.TicketMessage:SetMultiline( true )
 
-			CTBottomPanel:SizeToContents()
-			CTTopPanel:SizeToContents()
+			THMenu.CTBottomPanel:SizeToContents()
+			THMenu.CTTopPanel:SizeToContents()
 
 		--View tickets
-		local ViewTicketsTab = vgui.Create( "THTab", THMenu )
-		ViewTicketsTab:Dock( FILL )
-		ViewTicketsTab:DockMargin( 4, 36, 4, 4 )
+		THMenu.ViewTicketsTab = vgui.Create( "THTab", THMenu.Main )
+		THMenu.ViewTicketsTab:Dock( FILL )
+		THMenu.ViewTicketsTab:DockMargin( 4, 36, 4, 4 )
 
-			local TicketsListView = vgui.Create( "DListView", ViewTicketsTab )
-			TicketsListView:Dock( FILL )
-			TicketsListView:DockMargin( 4, 4, 4, 4 )
-			TicketsListView:AddColumn( "Date" )
-			TicketsListView:AddColumn( "Ticketnumber" )
-			TicketsListView:AddColumn( "Category" )
-			TicketsListView:AddColumn( "User" )
-			TicketsListView:AddColumn( "Status" )
+			THMenu.TicketsListView = vgui.Create( "DListView", THMenu.ViewTicketsTab )
+			THMenu.TicketsListView:Dock( FILL )
+			THMenu.TicketsListView:DockMargin( 4, 4, 4, 4 )
+			THMenu.TicketsListView:AddColumn( "Date" )
+			THMenu.TicketsListView:AddColumn( "Ticketnumber" )
+			THMenu.TicketsListView:AddColumn( "Category" )
+			THMenu.TicketsListView:AddColumn( "User" )
+			THMenu.TicketsListView:AddColumn( "Status" )
+			TicketMenuFillTickets()
 
-			for k,v in pairs( TicketHandler.Tickets ) do
-
-				local status = "Awaiting Response"
-				if v.status == 1 then status = "Being Reviewed" elseif v.status == 2 then status = "Closed" end
-
-				TicketsListView:AddLine( v.time, v.number, v.category, v.user .. " (" .. v.steamid .. ")", status )
-
-			end
-
-		ViewTicketsTab:Hide()
+		THMenu.ViewTicketsTab:Hide()
 
 		--View specific ticket
-		local OpenTicketTab = vgui.Create( "THTab", THMenu )
-		OpenTicketTab:Dock( FILL )
-		OpenTicketTab:DockMargin( 4, 36, 4, 4 )
+		THMenu.OpenTicketTab = vgui.Create( "THTab", THMenu.Main )
+		THMenu.OpenTicketTab:Dock( FILL )
+		THMenu.OpenTicketTab:DockMargin( 4, 36, 4, 4 )
 
 			--Top panel
-			local OTTopPanel = vgui.Create( "DPanel", OpenTicketTab )
-			OTTopPanel:Dock( TOP )
-			OTTopPanel:DockMargin( 4, 4, 4, 0 )
-			OTTopPanel:SetBackgroundColor( Color( 255, 0, 0, 255 ) )
+			THMenu.OTTopPanel = vgui.Create( "DPanel", THMenu.OpenTicketTab )
+			THMenu.OTTopPanel:Dock( TOP )
+			THMenu.OTTopPanel:DockMargin( 4, 4, 4, 0 )
+			THMenu.OTTopPanel:SetBackgroundColor( Color( 255, 0, 0, 255 ) )
 
 				--Ticket information
-				local TicketInfoLabel1 = vgui.Create( "DLabel", OTTopPanel )
-				TicketInfoLabel1:Dock( LEFT )
-				TicketInfoLabel1:SetSize( 200, 20 )
-				TicketInfoLabel1:SetFont( "TicketFontLarge" )
-				TicketInfoLabel1:SetText( "TICKET INFORMATION" )
-				TicketInfoLabel1:SetTextColor( Color( 0, 0, 0, 255 ) )
+				THMenu.TicketInfoLabel1 = vgui.Create( "DLabel", THMenu.OTTopPanel )
+				THMenu.TicketInfoLabel1:Dock( LEFT )
+				THMenu.TicketInfoLabel1:SetSize( 200, 20 )
+				THMenu.TicketInfoLabel1:SetFont( "TicketFontLarge" )
+				THMenu.TicketInfoLabel1:SetText( "TICKET INFORMATION" )
+				THMenu.TicketInfoLabel1:SetTextColor( Color( 0, 0, 0, 255 ) )
 
-				local TicketAdminLabel = vgui.Create( "DLabel", OTTopPanel ) 
-				TicketAdminLabel:Dock( RIGHT )
-				TicketAdminLabel:SetSize( 200, 20 )
-				TicketAdminLabel:SetFont( "TicketFontLarge" )
-				TicketAdminLabel:SetText( "none" )
-				TicketAdminLabel:SetTextColor( Color( 0, 0, 0, 255 ) )
+				THMenu.TicketAdminLabel = vgui.Create( "DLabel", THMenu.OTTopPanel ) 
+				THMenu.TicketAdminLabel:Dock( RIGHT )
+				THMenu.TicketAdminLabel:SetSize( 200, 20 )
+				THMenu.TicketAdminLabel:SetFont( "TicketFontLarge" )
+				THMenu.TicketAdminLabel:SetText( "none" )
+				THMenu.TicketAdminLabel:SetTextColor( Color( 0, 0, 0, 255 ) )
 
-		OpenTicketTab:Hide()
+		THMenu.OpenTicketTab:Hide()
 
 
 	--
 
-	CreateTicketButton.DoClick = function() 
-		ViewTicketsTab:Hide()
-		OpenTicketTab:Hide()
-		CreateTicketTab:Show()
+	THMenu.CreateTicketButton.DoClick = function() 
+		THMenu.ViewTicketsTab:Hide()
+		THMenu.OpenTicketTab:Hide()
+		THMenu.CreateTicketTab:Show()
 	end
 
-	ViewTicketsButton.DoClick = function()
-		CreateTicketTab:Hide()
-		OpenTicketTab:Hide()
-		ViewTicketsTab:Show()
+	THMenu.ViewTicketsButton.DoClick = function()
+		THMenu.CreateTicketTab:Hide()
+		THMenu.OpenTicketTab:Hide()
+		THMenu.ViewTicketsTab:Show()
 	end
 
-	SubmitTicketButton.DoClick = function()
+	THMenu.SubmitTicketButton.DoClick = function()
 
 		local newticket = {}
-		newticket.category = SelectCategory:GetValue()
+		newticket.category = THMenu.SelectCategory:GetValue()
 
 		if newticket.category == "Report Player" then
-			newticket.rply = ReportPlayerSelect:GetSelected()
+			newticket.rply = THMenu.ReportPlayerSelect:GetSelected()
 		end
 
-		newticket.message = TicketMessage:GetText()
-		newticket.chat = IncludeChatLogs:GetChecked()
-		newticket.deaths = IncludeDeathLogs:GetChecked()
-		newticket.connection = IncludeConnectionLogs:GetChecked()
-		newticket.damage = IncludeDamageLogs:GetChecked()
+		newticket.message = THMenu.TicketMessage:GetText()
+		newticket.chat = THMenu.IncludeChatLogs:GetChecked()
+		newticket.deaths = THMenu.IncludeDeathLogs:GetChecked()
+		newticket.connection = THMenu.IncludeConnectionLogs:GetChecked()
+		newticket.damage = THMenu.IncludeDamageLogs:GetChecked()
 
 		TicketHandlerCreateTicket( newticket )
 
 	end
 
-	TicketsListView.DoDoubleClick = function( lineID, line )
+	THMenu.TicketsListView.DoDoubleClick = function( lineID, line )
 
-		local selectedticketnumber = TicketsListView:GetLine( line ):GetValue( 2 )
-		local OpenTicket = {}
-
-		if !file.Exists( "tickethandler/tickets/" .. selectedticketnumber .. ".txt", "DATA" ) then
-			OpenTicket = TicketHandlerRequestFullTicket( selectedticketnumber )
-		else
-			OpenTicket = util.JSONToTable( file.Read( "tickethandler/tickets/" .. selectedticketnumber .. ".txt", "DATA" ) )
-		end
-
-		OpenTicketTab:Show()
+		local selectedticketnumber = THMenu.TicketsListView:GetLine( line ):GetValue( 2 )
+		TicketHandlerRequestFullTicket( selectedticketnumber )
 
 	end
 
-	THMenu:MakePopup()
+	THMenu.Main:MakePopup()
 
 end
 

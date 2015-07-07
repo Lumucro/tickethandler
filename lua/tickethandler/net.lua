@@ -22,7 +22,7 @@ function TicketHandlerSendNewTicket( ticketinfo )
 
 	for k,v in pairs( player.GetAll() ) do
 		if ticketinfo[1].steamid == v:SteamID() || IsTicketHandlerAdmin( v ) then
-			
+
 			net.Start( "TicketHandlerSendTickets" )
 				net.WriteTable( ticketinfo )
 			net.Send( v )
@@ -57,7 +57,7 @@ local function TicketHandlerSendFullTicket( ply, ticketnumber )
 	if file.Exists( TicketHandler.Config.Path .. "/tickets/" .. ticketnumber .. ".txt", "DATA" ) then
 		fullticket = util.JSONToTable( file.Read( TicketHandler.Config.Path .. "/tickets/" .. ticketnumber .. ".txt", "DATA" ) )
 	else
-		return
+		return {}
 	end
 
 	if !( fullticket.usersteamid == ply:SteamID() || IsTicketHandlerAdmin( ply ) ) then return end
@@ -98,6 +98,27 @@ net.Receive( "TicketHandlerCreateTicket", function( length, ply )
 
 end )
 
+net.Receive( "TicketHandlerChangeTicketStatus", function( length, ply ) 
+
+	--if !IsTicketHandlerAdmin( ply ) then return end
+
+	local ticketinfo = net.ReadTable()
+
+	if !file.Exists( TicketHandler.Config.Path .. "/tickets/" .. ticketinfo.number .. ".txt", "DATA" ) then return end
+	
+	local oldticket = util.JSONToTable( file.Read( TicketHandler.Config.Path .. "/tickets/" .. ticketinfo.number .. ".txt", "DATA" ) )
+	if !( ticketinfo.status == 1 || ticketinfo.status == 2 ) then return end
+	
+	for k,v in pairs( TicketHandler.Tickets ) do
+		if v.number == ticketinfo.number then
+			v.status = ticketinfo.status
+		end
+	end
+
+	oldticket.status = ticketinfo.status
+	file.Write( TicketHandler.Config.Path .. "/tickets/" .. ticketinfo.number .. ".txt", oldticket )
+
+end )
 
 /*
 	HOOKS

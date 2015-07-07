@@ -45,6 +45,7 @@ util.AddNetworkString( "TicketHandlerRequestTicket" )
 util.AddNetworkString( "TicketHandlerSendFullTicket" )
 util.AddNetworkString( "TicketHandlerCreateTempTicket" )
 util.AddNetworkString( "TicketHandlerCreateTicket" )
+util.AddNetworkString( "TicketHandlerChangeTicketStatus" )
 /*
 	TIMER
 */
