@@ -4,7 +4,7 @@
 
 hook.Add( "EntityTakeDamage", "TicketHandlerLogDamage", function( target, dmginfo )
 
-	if GAMEMODE_NAME == "terrortown" && ( GAMEMODE.round_state == ROUND_WAIT || GAMEMODE.round_state == ROUND_PREP ) then print("ttt and waiting or post-round") return end
+	if GAMEMODE_NAME == "terrortown" && ( GAMEMODE.round_state == ROUND_WAIT || GAMEMODE.round_state == ROUND_PREP ) then return end
 	if dmginfo:GetDamage() == 0 then return end
 
 	if target:IsPlayer() && IsValid(target) then

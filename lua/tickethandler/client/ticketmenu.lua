@@ -20,7 +20,14 @@ function TicketMenuOpenTicket( ticket )
 
 	if THMenu.OpenTicketTab == nil then return end
 
-	THMenu.TicketAdminLabel:SetText( ticket.user )
+	if ticket.admin == nil then
+		THMenu.TicketAdminLabel:SetText( "waiting for admin" )
+	else
+		THMenu.TicketAdminLabel:SetText( ticket.admin )		
+	end
+
+	THMenu.TicketDescription:SetText( ticket.message )
+
 	THMenu.OpenTicketTab:Show()
 
 end
@@ -199,7 +206,7 @@ local function TicketHandlerMenu()
 			--Top panel
 			THMenu.OTTopPanel = vgui.Create( "DPanel", THMenu.OpenTicketTab )
 			THMenu.OTTopPanel:Dock( TOP )
-			THMenu.OTTopPanel:DockMargin( 4, 4, 4, 0 )
+			THMenu.OTTopPanel:DockMargin( 4, 4, 4, 4 )
 			THMenu.OTTopPanel:SetBackgroundColor( Color( 255, 0, 0, 255 ) )
 
 				--Ticket information
@@ -217,8 +224,57 @@ local function TicketHandlerMenu()
 				THMenu.TicketAdminLabel:SetText( "none" )
 				THMenu.TicketAdminLabel:SetTextColor( Color( 0, 0, 0, 255 ) )
 
-		THMenu.OpenTicketTab:Hide()
+			--Bottom Panel
+			THMenu.OTBottomPanel = vgui.Create( "DPanel", THMenu.OpenTicketTab )
+			THMenu.OTBottomPanel:Dock( BOTTOM )
+			THMenu.OTBottomPanel:DockMargin( 4, 4, 4, 4 )
+			THMenu.OTBottomPanel:SetBackgroundColor( Color( 255, 0, 0, 255 ) )
 
+				THMenu.MarkTicketClosed = vgui.Create( "DButton", THMenu.OTBottomPanel )
+				THMenu.MarkTicketClosed:Dock( RIGHT )
+				THMenu.MarkTicketClosed:SetSize( 100, 24 )
+				THMenu.MarkTicketClosed:SetText( "Close Ticket" )
+
+			--Right Panel
+			THMenu.OTRightPanel = vgui.Create( "DPanel", THMenu.OpenTicketTab )
+			THMenu.OTRightPanel:Dock( RIGHT )
+			THMenu.OTRightPanel:DockMargin( 4, 0, 4, 0 )
+			THMenu.OTRightPanel:SetBackgroundColor( Color( 255, 0, 0, 255 ) )
+
+				THMenu.ViewChatLogs = vgui.Create( "DButton", THMenu.OTRightPanel )
+				THMenu.ViewChatLogs:SetText( "View chat logs" )
+				THMenu.ViewChatLogs:Dock( TOP )
+				THMenu.ViewChatLogs:DockMargin( 4, 4, 4, 4 )
+
+				THMenu.ViewDeathLogs = vgui.Create( "DButton", THMenu.OTRightPanel )
+				THMenu.ViewDeathLogs:SetText( "View chat logs" )
+				THMenu.ViewDeathLogs:Dock( TOP )
+				THMenu.ViewDeathLogs:DockMargin( 4, 4, 4, 4 )
+
+				THMenu.ViewDamageLogs = vgui.Create( "DButton", THMenu.OTRightPanel )
+				THMenu.ViewDamageLogs:SetText( "View chat logs" )
+				THMenu.ViewDamageLogs:Dock( TOP )
+				THMenu.ViewDamageLogs:DockMargin( 4, 4, 4, 4 )
+
+				THMenu.ViewConnectionLogs = vgui.Create( "DButton", THMenu.OTRightPanel )
+				THMenu.ViewConnectionLogs:SetText( "View chat logs" )
+				THMenu.ViewConnectionLogs:Dock( TOP )
+				THMenu.ViewConnectionLogs:DockMargin( 4, 4, 4, 4 )
+
+			--Left Panel
+			THMenu.OTLeftPanel = vgui.Create( "DPanel", THMenu.OpenTicketTab )
+			THMenu.OTLeftPanel:Dock( FILL )
+			THMenu.OTLeftPanel:DockMargin( 4, 0, 0, 0 )
+			THMenu.OTLeftPanel:SetBackgroundColor( Color( 255, 0, 0, 255 ) )
+
+				THMenu.TicketDescription = vgui.Create( "DLabel", THMenu.OTLeftPanel )
+				THMenu.TicketDescription:SetFont( "TicketFontSmall" )
+				THMenu.TicketDescription:SetText( "No ticket description" )
+				THMenu.TicketDescription:SetTextColor( Color( 0, 0, 0, 255 ) )
+				THMenu.TicketDescription:Dock( FILL )
+				THMenu.TicketDescription:SetWrap( true )
+
+		THMenu.OpenTicketTab:Hide()
 
 	--
 

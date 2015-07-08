@@ -60,6 +60,7 @@ local function TicketHandlerSendFullTicket( ply, ticketnumber )
 		return {}
 	end
 
+	if fullticket == nil then return end
 	if !( fullticket.usersteamid == ply:SteamID() || IsTicketHandlerAdmin( ply ) ) then return end
 
 	net.Start( "TicketHandlerSendFullTicket" )
@@ -100,7 +101,7 @@ end )
 
 net.Receive( "TicketHandlerChangeTicketStatus", function( length, ply ) 
 
-	--if !IsTicketHandlerAdmin( ply ) then return end
+	if !IsTicketHandlerAdmin( ply ) then return end
 
 	local ticketinfo = net.ReadTable()
 
@@ -116,7 +117,8 @@ net.Receive( "TicketHandlerChangeTicketStatus", function( length, ply )
 	end
 
 	oldticket.status = ticketinfo.status
-	file.Write( TicketHandler.Config.Path .. "/tickets/" .. ticketinfo.number .. ".txt", oldticket )
+
+	file.Write( TicketHandler.Config.Path .. "/tickets/" .. ticketinfo.number .. ".txt", util.TableToJSON( oldticket ) )
 
 end )
 

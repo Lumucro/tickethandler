@@ -8,7 +8,6 @@ local function TicketHandlerUpdateTicket( ticket )
 		TicketHandlerChangeTicketStatus( { number = ticket.number, status = 1 } )
 	end
 
-	TicketMenuFillTickets()
 	TicketMenuOpenTicket( ticket )
 
 end
@@ -48,12 +47,8 @@ function TicketHandlerChangeTicketStatus( ticketinfo )
 	net.Start( "TicketHandlerChangeTicketStatus" )
 		net.WriteTable( ticketinfo )
 	net.SendToServer()
-
-	for k,v in pairs( TicketHandler.Tickets ) do
-		if v.number == ticketinfo.number then
-			v.status = ticketinfo.status
-		end
-	end
+	
+	TicketMenuFillTickets()
 
 end
 

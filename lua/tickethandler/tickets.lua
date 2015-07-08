@@ -93,8 +93,10 @@ end
 local f, d = file.Find( TicketHandler.Config.Path .. "/tickets/*", "DATA" ) 
 
 for k,v in pairs( f ) do
-	
+
 	local readticket = util.JSONToTable( file.Read( TicketHandler.Config.Path .. "/tickets/" .. v, "DATA" ) )
+
+	if readticket == nil then return end
 	table.insert( TicketHandler.Tickets, { number = readticket.number, time = readticket.date, category = readticket.category, user = readticket.user, status = readticket.status, steamid = readticket.usersteamid } )
 
 end
