@@ -49,6 +49,4 @@ hook.Add( "DoPlayerDeath", "TicketHandlerLogDeaths", function( ply, attacker, dm
 
 	end
 
-	PrintTable( TicketHandler.KillLogs )
-
 end )
