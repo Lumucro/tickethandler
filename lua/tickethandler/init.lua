@@ -20,10 +20,10 @@ TicketHandler.ConnectionLogs = TicketHandler.ConnectionLogs || {}
 
 include( "tickethandler/config.lua" )
 include( "tickethandler/data.lua" )
-include( "tickethandler/logs/chatlog.lua" )
 include( "tickethandler/logs/damagelog.lua" )
-include( "tickethandler/logs/deathlog.lua" )
 include( "tickethandler/logs/connectionlog.lua" )
+include( "tickethandler/logs/chatlog.lua" )
+include( "tickethandler/logs/deathlog.lua" )
 include( "tickethandler/tickets.lua" )
 include( "tickethandler/net.lua" )
 
@@ -31,7 +31,6 @@ include( "tickethandler/net.lua" )
 	ADDCSLUAFILE
 */
 
-AddCSLuaFile( "tickethandler/client/fonts.lua" )
 AddCSLuaFile( "tickethandler/client/vgui.lua" )
 AddCSLuaFile( "tickethandler/client/cl_net.lua" )
 AddCSLuaFile( "tickethandler/client/ticketmenu.lua" )
@@ -46,6 +45,7 @@ util.AddNetworkString( "TicketHandlerSendFullTicket" )
 util.AddNetworkString( "TicketHandlerCreateTempTicket" )
 util.AddNetworkString( "TicketHandlerCreateTicket" )
 util.AddNetworkString( "TicketHandlerChangeTicketStatus" )
+
 /*
 	TIMER
 */
@@ -92,11 +92,9 @@ hook.Add( "PlayerSay", "TicketHandlerChatCommands", function( ply, text, teamsay
 		
 		if text == v then
 			ply:ConCommand( "TicketHandler_Menu" )
-			return false
+			return ""
 		end
 
 	end
-
-	return true
 
 end )

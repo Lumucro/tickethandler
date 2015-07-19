@@ -29,16 +29,8 @@ function CreateTicket( ply, cat, rply, msg, chatlog, dmglog, deathlog, connectlo
 
 	if rply != nil && cat == "Report Player" then
 
-		rply = string.reverse( rply )
-		local steamid = string.find( rply, "(", 1, true )
-		steamid = string.sub( rply, 2, steamid-1 )
-		steamid = string.reverse( steamid )
-
-		--I'm aware that this is terrible but I ran out of coffee and had no other ideas
-		--Sorry :(
-
-		ticketinfo.reported = player.GetBySteamID( steamid ):Nick()
-		ticketinfo.reportedsteamid = steamid
+		ticketinfo.reported = rply:Nick()
+		ticketinfo.reportedsteamid = rply:SteamID()
 
 	end
 

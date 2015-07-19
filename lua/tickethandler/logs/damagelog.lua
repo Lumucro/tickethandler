@@ -26,6 +26,7 @@ hook.Add( "EntityTakeDamage", "TicketHandlerLogDamage", function( target, dmginf
 		else
 		    
 			logmsg.attacker = dmginfo:GetAttacker():GetClass()
+			logmsg.attackersteamid = "NON-PLAYER"
 
 		end
 

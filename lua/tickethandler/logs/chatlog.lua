@@ -2,7 +2,7 @@
 	LOG CHAT
 */
 
-hook.Add( "PlayerSay", "TicketHandlerLogChat", function( ply, text ) 
+hook.Add( "PlayerSay", "TicketHandlerLogChat", function( ply, text, teamsay ) 
 
 	local logmsg = {
 

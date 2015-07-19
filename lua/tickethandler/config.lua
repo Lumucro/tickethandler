@@ -32,9 +32,10 @@ TicketHandler.Config.ChatCommands = {
 	"!tickets",
 	"!ticket",
 	"!contact",
-	"!admin"
+	"!admin",
+	"!suggest"
 
-}
+} -- Chat commands to open the mnu
 
 TicketHandler.Config.AdminGroups = {
 	

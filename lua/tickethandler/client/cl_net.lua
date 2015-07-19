@@ -47,8 +47,6 @@ function TicketHandlerChangeTicketStatus( ticketinfo )
 	net.Start( "TicketHandlerChangeTicketStatus" )
 		net.WriteTable( ticketinfo )
 	net.SendToServer()
-	
-	TicketMenuFillTickets()
 
 end
 

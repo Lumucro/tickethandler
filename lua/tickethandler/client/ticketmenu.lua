@@ -8,7 +8,7 @@ function TicketMenuFillTickets()
 	for k,v in pairs( TicketHandler.Tickets ) do
 
 		local status = "Awaiting Response"
-		if v.status == 1 then status = "Being Reviewed" elseif v.status == 2 then status = "Closed" end
+		if v.status == 1 then status = "Being Reviewed" elseif v.status == 2 then status = "Resolved" end
 
 		THMenu.TicketsListView:AddLine( v.time, v.number, v.category, v.user .. " (" .. v.steamid .. ")", status )
 
@@ -27,6 +27,100 @@ function TicketMenuOpenTicket( ticket )
 	end
 
 	THMenu.TicketDescription:SetText( ticket.message )
+
+	-- Hardcoded, yay!
+	if ticket.category == "Report Player" then
+		THMenu.TicketReportedPlayer:SetText( "Reported player: " .. ticket.reported .. " (" .. ticket.reportedsteamid .. ")" )
+		THMenu.TicketReportedPlayer:Dock( TOP )
+		THMenu.TicketReportedPlayer:Show()
+		THMenu.CopyReportedID:Show()
+	else
+		THMenu.TicketReportedPlayer:Hide()
+		THMenu.CopyReportedID:Hide()
+	end
+
+	THMenu.TicketOwnerNick:SetText( "Ticket made by: " .. ticket.user .. " (" .. ticket.usersteamid .. ")" )
+	THMenu.TicketDate:SetText( "Ticket created on: " .. ticket.date )
+
+	THMenu.ViewChatLogs.DoClick = function()
+
+		MsgN("--		PRINTING TICKET CHAT LOGS		--")
+
+		if istable( ticket.chatlog ) then
+			for k,v in pairs( ticket.chatlog ) do
+				MsgN( v.name .. " [" .. v.steamid .. "] : " .. v.message )
+			end
+		end
+
+		MsgN("--		END OF LOGS			--")
+
+	end
+
+	THMenu.ViewDeathLogs.DoClick = function()
+
+		MsgN("--		PRINTING TICKET KILL LOGS		--")
+
+		if istable( ticket.deathlog ) then
+			for k,v in pairs( ticket.deathlog ) do
+				MsgN( v.name .. " [" .. v.steamid .. "] killed " .. v.victim .. " [" .. v.victimsteamid .. "] using " .. v.inflictor )
+			end
+		end
+
+		MsgN("--		END OF LOGS			--")
+
+	end
+
+	THMenu.ViewDamageLogs.DoClick = function()
+
+		MsgN("--		PRINTING TICKET DAMAGE LOGS		--")
+
+		if istable( ticket.dmglog ) then
+			for k,v in pairs( ticket.dmglog ) do
+				local attackersteam = v.attackersteamid || "NON-PLAYER"
+				MsgN( v.attacker .. " [" .. attackersteam .. "] hurt " .. v.victim .. " [" .. v.victimsteamid .. "] for " .. v.damage .. " dmg" )
+			end
+		end
+
+		MsgN("--		END OF LOGS			--")
+
+	end
+
+	THMenu.ViewConnectionLogs.DoClick = function()
+
+		MsgN("--		PRINTING TICKET CONNECTION LOGS		--")
+
+		if istable( ticket.connectlog ) then
+			for k,v in pairs( ticket.connectlog ) do
+				if v.type == "connect" then
+					MsgN( v.name .. " [" .. v.steamid .. "] connected to the server" )
+				else
+					MsgN( v.name .. " [" .. v.steamid .. "] disconnected from the server" )
+				end
+			end
+		end
+
+		MsgN("--		END OF LOGS			--")
+
+	end
+
+	THMenu.MarkTicketClosed.DoClick = function()
+
+		TicketHandlerChangeTicketStatus( { number = ticket.number, status = 2 } )
+
+	end
+
+	THMenu.CopyVictimID.DoClick = function()
+
+		SetClipboardText( ticket.usersteamid )
+
+	end
+
+	THMenu.CopyReportedID.DoClick = function()
+
+		if ticket.reportedsteamid == nil then return end
+		SetClipboardText( ticket.reportedsteamid )
+
+	end
 
 	THMenu.OpenTicketTab:Show()
 
@@ -100,7 +194,7 @@ local function TicketHandlerMenu()
 				THMenu.ReportPlayerSelect:SetColor( Color( 0, 0, 0, 255 ) )
 
 				for k,v in pairs( player.GetAll() ) do
-					THMenu.ReportPlayerSelect:AddChoice( v:Nick() .. " (" .. v:SteamID() .. ")" )
+					THMenu.ReportPlayerSelect:AddChoice( v:Nick() .. " (" .. v:SteamID() .. ")", v )
 				end
 
 				THMenu.ReportPlayerSelect:SetSize( THMenu.Main:GetWide() / 4, 30 )
@@ -207,7 +301,7 @@ local function TicketHandlerMenu()
 			THMenu.OTTopPanel = vgui.Create( "DPanel", THMenu.OpenTicketTab )
 			THMenu.OTTopPanel:Dock( TOP )
 			THMenu.OTTopPanel:DockMargin( 4, 4, 4, 4 )
-			THMenu.OTTopPanel:SetBackgroundColor( Color( 255, 0, 0, 255 ) )
+			THMenu.OTTopPanel:SetBackgroundColor( Color( 0, 0, 0, 0 ) )
 
 				--Ticket information
 				THMenu.TicketInfoLabel1 = vgui.Create( "DLabel", THMenu.OTTopPanel )
@@ -223,60 +317,103 @@ local function TicketHandlerMenu()
 				THMenu.TicketAdminLabel:SetFont( "TicketFontLarge" )
 				THMenu.TicketAdminLabel:SetText( "none" )
 				THMenu.TicketAdminLabel:SetTextColor( Color( 0, 0, 0, 255 ) )
+				THMenu.TicketAdminLabel:SetContentAlignment( 6 )
 
-			--Bottom Panel
-			THMenu.OTBottomPanel = vgui.Create( "DPanel", THMenu.OpenTicketTab )
-			THMenu.OTBottomPanel:Dock( BOTTOM )
-			THMenu.OTBottomPanel:DockMargin( 4, 4, 4, 4 )
-			THMenu.OTBottomPanel:SetBackgroundColor( Color( 255, 0, 0, 255 ) )
+			--Second top panel
+			THMenu.OTTopLeftPanel = vgui.Create( "DPanel", THMenu.OpenTicketTab )
+			THMenu.OTTopLeftPanel:Dock( TOP )
+			THMenu.OTTopLeftPanel:SetSize( 10, 60 )
+			THMenu.OTTopLeftPanel:DockMargin( 4, 0, 0, 4 )
+			THMenu.OTTopLeftPanel:SetBackgroundColor( Color( 0, 0, 0, 0 ) )
 
-				THMenu.MarkTicketClosed = vgui.Create( "DButton", THMenu.OTBottomPanel )
-				THMenu.MarkTicketClosed:Dock( RIGHT )
-				THMenu.MarkTicketClosed:SetSize( 100, 24 )
-				THMenu.MarkTicketClosed:SetText( "Close Ticket" )
+				THMenu.TicketDate = vgui.Create( "DLabel", THMenu.OTTopLeftPanel )
+				THMenu.TicketDate:SetFont( "TicketFontSmall" )
+				THMenu.TicketDate:SetText( "Ticket created on NODATE" )
+				THMenu.TicketDate:SetTextColor( Color( 0, 0, 0, 255 ) )
+				THMenu.TicketDate:Dock( TOP )
+				THMenu.TicketDate:SetContentAlignment( 4 )
+
+				THMenu.TicketOwnerNick = vgui.Create( "DLabel", THMenu.OTTopLeftPanel )
+				THMenu.TicketOwnerNick:SetFont( "TicketFontSmall" )
+				THMenu.TicketOwnerNick:SetText( "Ticket made by: nobody" )
+				THMenu.TicketOwnerNick:SetTextColor( Color( 0, 0, 0, 255 ) )
+				THMenu.TicketOwnerNick:Dock( TOP )
+				THMenu.TicketOwnerNick:SetContentAlignment( 4 )
+
+				THMenu.TicketReportedPlayer = vgui.Create( "DLabel", THMenu.OTTopLeftPanel )
+				THMenu.TicketReportedPlayer:SetFont( "TicketFontSmall" )
+				THMenu.TicketReportedPlayer:SetText( "Reported player: nobody" )
+				THMenu.TicketReportedPlayer:SetTextColor( Color( 0, 0, 0, 255 ) )
+				THMenu.TicketReportedPlayer:SetContentAlignment( 4 )
+				THMenu.TicketReportedPlayer:Dock( TOP )
+				THMenu.TicketReportedPlayer:Hide()
+
+			--Description label
+			THMenu.TicketDescLabel = vgui.Create( "DLabel", THMenu.OpenTicketTab )
+			THMenu.TicketDescLabel:SetFont( "TicketFontSmall" )
+			THMenu.TicketDescLabel:SetText( "User said the following" )
+			THMenu.TicketDescLabel:SetTextColor( Color( 0, 0, 0, 255 ) )
+			THMenu.TicketDescLabel:Dock( TOP )
+			THMenu.TicketDescLabel:DockMargin( 4, 8, 0, 0 )
+			THMenu.TicketDescLabel:SetContentAlignment( 4 )
 
 			--Right Panel
 			THMenu.OTRightPanel = vgui.Create( "DPanel", THMenu.OpenTicketTab )
 			THMenu.OTRightPanel:Dock( RIGHT )
-			THMenu.OTRightPanel:DockMargin( 4, 0, 4, 0 )
-			THMenu.OTRightPanel:SetBackgroundColor( Color( 255, 0, 0, 255 ) )
+			THMenu.OTRightPanel:SetSize( 200, 20 )
+			THMenu.OTRightPanel:DockMargin( 4, 0, 4, 4 )
+			THMenu.OTRightPanel:SetBackgroundColor( Color( 0, 0, 0, 0 ) )
 
 				THMenu.ViewChatLogs = vgui.Create( "DButton", THMenu.OTRightPanel )
-				THMenu.ViewChatLogs:SetText( "View chat logs" )
+				THMenu.ViewChatLogs:SetText( "Print chat logs" )
 				THMenu.ViewChatLogs:Dock( TOP )
-				THMenu.ViewChatLogs:DockMargin( 4, 4, 4, 4 )
+				THMenu.ViewChatLogs:DockMargin( 0, 0, 0, 4 )
 
 				THMenu.ViewDeathLogs = vgui.Create( "DButton", THMenu.OTRightPanel )
-				THMenu.ViewDeathLogs:SetText( "View chat logs" )
+				THMenu.ViewDeathLogs:SetText( "Print kill logs" )
 				THMenu.ViewDeathLogs:Dock( TOP )
-				THMenu.ViewDeathLogs:DockMargin( 4, 4, 4, 4 )
+				THMenu.ViewDeathLogs:DockMargin( 0, 4, 0, 4 )
 
 				THMenu.ViewDamageLogs = vgui.Create( "DButton", THMenu.OTRightPanel )
-				THMenu.ViewDamageLogs:SetText( "View chat logs" )
+				THMenu.ViewDamageLogs:SetText( "Print damage logs" )
 				THMenu.ViewDamageLogs:Dock( TOP )
-				THMenu.ViewDamageLogs:DockMargin( 4, 4, 4, 4 )
+				THMenu.ViewDamageLogs:DockMargin( 0, 4, 0, 4 )
 
 				THMenu.ViewConnectionLogs = vgui.Create( "DButton", THMenu.OTRightPanel )
-				THMenu.ViewConnectionLogs:SetText( "View chat logs" )
+				THMenu.ViewConnectionLogs:SetText( "Print connect logs" )
 				THMenu.ViewConnectionLogs:Dock( TOP )
-				THMenu.ViewConnectionLogs:DockMargin( 4, 4, 4, 4 )
+				THMenu.ViewConnectionLogs:DockMargin( 0, 4, 0, 4 )
+
+				THMenu.CopyVictimID = vgui.Create( "DButton", THMenu.OTRightPanel )
+				THMenu.CopyVictimID:SetText( "Copy user SteamID" )
+				THMenu.CopyVictimID:Dock( TOP )
+				THMenu.CopyVictimID:DockMargin( 0, 24, 0, 4 )
+
+				THMenu.CopyReportedID = vgui.Create( "DButton", THMenu.OTRightPanel )
+				THMenu.CopyReportedID:SetText( "Copy reported SteamID" )
+				THMenu.CopyReportedID:Dock( TOP )
+				THMenu.CopyReportedID:DockMargin( 0, 4, 0, 4 )
+				THMenu.CopyReportedID:Hide()
+
+				THMenu.MarkTicketClosed = vgui.Create( "DButton", THMenu.OTRightPanel )
+				THMenu.MarkTicketClosed:Dock( BOTTOM )
+				THMenu.MarkTicketClosed:SetText( "Mark ticket resolved" )
 
 			--Left Panel
 			THMenu.OTLeftPanel = vgui.Create( "DPanel", THMenu.OpenTicketTab )
 			THMenu.OTLeftPanel:Dock( FILL )
-			THMenu.OTLeftPanel:DockMargin( 4, 0, 0, 0 )
-			THMenu.OTLeftPanel:SetBackgroundColor( Color( 255, 0, 0, 255 ) )
+			THMenu.OTLeftPanel:DockMargin( 4, 0, 0, 4 )
+			THMenu.OTLeftPanel:SetBackgroundColor( Color( 0, 0, 0, 0 ) )
 
-				THMenu.TicketDescription = vgui.Create( "DLabel", THMenu.OTLeftPanel )
+				THMenu.TicketDescription = vgui.Create( "DTextEntry", THMenu.OTLeftPanel )
 				THMenu.TicketDescription:SetFont( "TicketFontSmall" )
 				THMenu.TicketDescription:SetText( "No ticket description" )
 				THMenu.TicketDescription:SetTextColor( Color( 0, 0, 0, 255 ) )
 				THMenu.TicketDescription:Dock( FILL )
-				THMenu.TicketDescription:SetWrap( true )
+				THMenu.TicketDescription:SetMultiline( true )
+				THMenu.TicketDescription:SetEditable( false )
 
 		THMenu.OpenTicketTab:Hide()
-
-	--
 
 	THMenu.CreateTicketButton.DoClick = function() 
 		THMenu.ViewTicketsTab:Hide()
@@ -296,7 +433,7 @@ local function TicketHandlerMenu()
 		newticket.category = THMenu.SelectCategory:GetValue()
 
 		if newticket.category == "Report Player" then
-			newticket.rply = THMenu.ReportPlayerSelect:GetSelected()
+			newticket.rply = THMenu.ReportPlayerSelect:GetOptionData(THMenu.ReportPlayerSelect:GetSelectedID())
 		end
 
 		newticket.message = THMenu.TicketMessage:GetText()

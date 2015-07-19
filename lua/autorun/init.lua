@@ -20,5 +20,6 @@ end
 TicketHandlerCategories = {
 	'Help',
 	'Report Bug',
-	'Report Player'
+	'Report Player',
+	"Other"
 }
